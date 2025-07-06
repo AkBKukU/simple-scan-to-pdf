@@ -46,6 +46,7 @@ def main():
                     description='Scanning post processing utility',
                     epilog='NOTE: Put filenames as last parameter')
     parser.add_argument('-p', '--page-order', help="List of page order offsets to process", type=json.loads, default=[1])
+    parser.add_argument('-l', '--layout-preset', help="Use predefined page order preset", choices={"stapled-flat"}, default=None)
     parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=None)
     parser.add_argument('-o', '--ocr', help="OCR final output", default=None)
     parser.add_argument('-b', '--black', help="Black level float percentage", type=float, default=0)
@@ -54,28 +55,32 @@ def main():
     parser.add_argument('-e', '--export-dir', help="Color level process values", default=None)
     parser.add_argument('filenames', help="", default=None, nargs=argparse.REMAINDER)
     args = parser.parse_args()
-    pprint(args)
+
+    if args.layout_preset == "stapled-flat":
+        page_layout = [[-1,1],[2,-2]]
+    else:
+        page_layout = args.page_order
 
     scan_sequence=1
     scans_per_page=1
     scan_start_offset=1
     scan_end_offset=0
-    for i,valuei in enumerate(args.page_order):
-        if isinstance(args.page_order[i], list):
-            scan_sequence=len(args.page_order)
+    for i,valuei in enumerate(page_layout):
+        if isinstance(page_layout[i], list):
+            scan_sequence=len(page_layout)
 
-            for j,valuej in enumerate(args.page_order[i]):
-                scans_per_page=len(args.page_order[i])
-                if args.page_order[i][j] > scan_start_offset:
-                    scan_start_offset = args.page_order[i][j]
-                if args.page_order[i][j] < scan_end_offset:
-                    scan_end_offset = args.page_order[i][j]
+            for j,valuej in enumerate(page_layout[i]):
+                scans_per_page=len(page_layout[i])
+                if page_layout[i][j] > scan_start_offset:
+                    scan_start_offset = page_layout[i][j]
+                if page_layout[i][j] < scan_end_offset:
+                    scan_end_offset = page_layout[i][j]
         else:
-            scans_per_page=len(args.page_order)
-            if args.page_order[i] > scan_start_offset:
-                scan_start_offset = args.page_order[i]
-            if args.page_order[i] < scan_end_offset:
-                scan_end_offset = args.page_order[i]
+            scans_per_page=len(page_layout)
+            if page_layout[i] > scan_start_offset:
+                scan_start_offset = page_layout[i]
+            if page_layout[i] < scan_end_offset:
+                scan_end_offset = page_layout[i]
 
 
 
@@ -86,9 +91,9 @@ def main():
     threads = []
     while page_index < page_end:
 
-        for i,valuei in enumerate(args.page_order):
-            if isinstance(args.page_order[i], list):
-                for j,valuej in enumerate(args.page_order[i]):
+        for i,valuei in enumerate(page_layout):
+            if isinstance(page_layout[i], list):
+                for j,valuej in enumerate(page_layout[i]):
 
                     half=None
                     if scans_per_page != 1 :
@@ -96,10 +101,10 @@ def main():
                             half = "right"
                         else:
                             half = "left"
-                    if args.page_order[i][j] > 0:
-                        page=page_index+args.page_order[i][j]
+                    if page_layout[i][j] > 0:
+                        page=page_index+page_layout[i][j]
                     else:
-                        page=page_end-args.page_order[i][j]
+                        page=page_end-page_layout[i][j]
 
                     print(f"{args.filenames[scan_index+i]} : {page} : {half}")
 
@@ -113,10 +118,10 @@ def main():
                         half = "right"
                     else:
                         half = "left"
-                if args.page_order[i] > 0:
-                    page=page_index+args.page_order[i]
+                if page_layout[i] > 0:
+                    page=page_index+page_layout[i]
                 else:
-                    page=page_end-args.page_order[i]
+                    page=page_end-page_layout[i]
 
                 print(f"{args.filenames[scan_index]} : {page} : {half}")
                 sectionImage(args.filenames[scan_index],args,page,half)
