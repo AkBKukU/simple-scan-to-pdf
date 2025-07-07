@@ -8,8 +8,7 @@ import json
 from pprint import pprint
 from enum import Enum
 
-# Externl System
-# import imagemagick
+# External System
 from wand.image import Image
 from ocrmypdf import ocr
 
@@ -26,25 +25,36 @@ class PageLayouts(Enum):
 
 def sectionImage(path,args,page_number,half=None, shrink=0,rotate=0):
 
+    # Load image file
     img = Image(filename=path)
+    # Convert to jpeg for file output
     img.format = 'jpeg'
+
+    # Only process if args are present, used to pass covers through unchanged
     if args is not None:
+        # Apply margin crop
         img.crop(
             args.margin_crop[0],
             args.margin_crop[2],
             img.size[0]-args.margin_crop[1],
             img.size[1]-args.margin_crop[3]
             )
+        # Apply color level
         img.level(args.black,args.white,args.gamma)
+        # Rotate full scan
         img.rotate(args.rotate)
+        # Set grayscale
         if args.grayscale:
             img.type = "grayscale"
+        # Crop to left side
         if half=="left" :
             img.crop(shrink, 0, round(img.size[0]/2-shrink/2), img.size[1])
+        # Crop to right side
         if half=="right":
             img.crop(round(img.size[0]/2+shrink/2), 0, img.size[0], img.size[1])
-
+        # Apply layout rotation
         img.rotate(rotate)
+        # If export dir is set, save jpgs
         if args.export_dir is not None:
             outdir=str(args.export_dir)+"/"
             if not os.path.exists(outdir):
@@ -125,12 +135,10 @@ usage.
         )
 
 def main():
-    """ Execute as a CLI and process parameters to rip and convert
+    """ Execute as a CLI and process parameters
 
     """
-
-    # Usage Example
-    # scan2pdf -p "[[1,4],[2,3]]" -r 90 -o -c "15%,90%,1.25" *.tiff
+    # Generate CLI parameter options from enum
     page_layout_options=[]
     for layout in PageLayouts:
         page_layout_options.append(layout.name)
@@ -162,24 +170,31 @@ def main():
     parser.add_argument('filenames', help="", default=None, nargs=argparse.REMAINDER)
     args = parser.parse_args()
 
+    # Print detailed help and exit
     if args.help_detailed:
         help_detailed()
         sys.exit(0)
 
+    # Find layout preset if provided
     if args.layout_preset.upper() in PageLayouts.__members__:
         page_layout = PageLayouts[args.layout_preset.upper()].value
     else:
         page_layout = args.page_order
 
+    # Determine the structure of scans based on page layout
     scan_sequence=1
     scans_per_page=1
     scan_start_offset=1
     scan_end_offset=0
     for i,valuei in enumerate(page_layout):
+        # Convert to mult-dim list if not already
         if not isinstance(page_layout[i], list):
             page_layout=[page_layout]
+
+        # Number of scans involved in each layout
         scan_sequence=len(page_layout)
 
+        # Find maximum values for layout
         for j,valuej in enumerate(page_layout[i]):
             scans_per_page=len(page_layout[i])
             if int(page_layout[i][j]) > scan_start_offset:
@@ -187,14 +202,17 @@ def main():
             if int(page_layout[i][j]) < scan_end_offset:
                 scan_end_offset = int(page_layout[i][j])
 
+    # Adjust page_index if front cover is provided
     prefix_offset=0
     if args.prefix_cover is not None:
         prefix_offset=1
 
+    # Adjust page_end if front cover is provided
     postfix_offset=0
     if args.postfix_cover is not None:
         postfix_offset=1
 
+    # Initialize position tracking for processing
     scan_index=0
     page_index=0+prefix_offset
     scan_count=len(args.filenames)
@@ -206,8 +224,10 @@ def main():
     print(f"scan_end_offset : {scan_end_offset}")
     print(f"page_end : {page_end}")
 
+    # Create array to hold all images
     imgs=[None]*(page_end-1+postfix_offset)
 
+    # Add front cover
     if args.prefix_cover is not None:
         imgs[0]=sectionImage(
             args.prefix_cover,
@@ -215,6 +235,7 @@ def main():
             0
             )
 
+    # Add rear cover
     if args.postfix_cover is not None:
         imgs[len(imgs)-1]=sectionImage(
             args.postfix_cover,
@@ -222,18 +243,20 @@ def main():
             len(imgs)-1
             )
 
+    # Iterate over scans until all pages have been processed
     while page_index < page_end-1:
-
-
+        # From page index process relates scans for page layout
         for i,valuei in enumerate(page_layout):
             for j,valuej in enumerate(page_layout[i]):
 
+                # Determine if scan is half and what half it is
                 half=None
                 if scans_per_page != 1 :
                     if j :
                         half = "right"
                     else:
                         half = "left"
+                # Determine page index from start or end
                 if int(page_layout[i][j]) > 0:
                     page=page_index+int(page_layout[i][j])
                 else:
@@ -241,6 +264,7 @@ def main():
 
                 print(f"{args.filenames[scan_index+i]} : {page} : {half}")
 
+                # Process scan and store image
                 imgs[page-1]=sectionImage(
                     args.filenames[scan_index+i],
                     args,
@@ -250,10 +274,12 @@ def main():
                     ((page_layout[i][j]-int(page_layout[i][j]))*10)*90
                     )
 
+        # Next process positions
         page_index+=scan_start_offset
         page_end+=scan_end_offset
-
         scan_index += scan_sequence
+
+    # Store PDF of all images
     with Image() as pdf_out:
         for i,value in enumerate(imgs):
             pdf_out.sequence.append(value)
@@ -261,6 +287,7 @@ def main():
             imgs[i]=None
         pdf_out.save(filename=args.name)
 
+    # OCR PDF
     if args.ocr:
         ocr(args.name,args.name,
             title=args.title,
