@@ -14,13 +14,6 @@ from ocrmypdf import ocr
 
 def sectionImage(path,args,page_number,half=None, shrink=0):
 
-    outdir=""
-    if args.export_dir is not None:
-        outdir=str(args.export_dir)+"/"
-
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-
     img = Image(filename=path)
     img.format = 'jpeg'
     img.level(args.black,args.white,args.gamma)
@@ -29,7 +22,11 @@ def sectionImage(path,args,page_number,half=None, shrink=0):
         img.crop(shrink, 0, round(img.size[0]/2-shrink/2), img.size[1])
     if half=="right":
         img.crop(round(img.size[0]/2+shrink/2), 0, img.size[0], img.size[1])
-    img.save(filename=outdir+str(page_number).zfill(4)+"_"+path.replace(".tiff", ".jpg"))
+    if args.export_dir is not None:
+        outdir=str(args.export_dir)+"/"
+        if not os.path.exists(outdir):
+            os.makedirs(outdir)
+        img.save(filename=outdir+str(page_number).zfill(4)+"_"+path.replace(".tiff", ".jpg"))
     return img
 
 
@@ -49,11 +46,12 @@ def main():
     parser.add_argument('-p', '--page-order', help="List of page order offsets to process", type=json.loads, default=[1])
     parser.add_argument('-l', '--layout-preset', help="Use predefined page order preset", choices={"stapled-flat"}, default=None)
     parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=None)
-    parser.add_argument('-o', '--ocr', help="OCR final output", default=None)
+    parser.add_argument('-o', '--ocr', help="OCR final output", action='store_true')
+    parser.add_argument('-n', '--name', help="Output filename", default="output.pdf")
     parser.add_argument('-b', '--black', help="Black level float percentage", type=float, default=0)
     parser.add_argument('-w', '--white', help="White level float percentage", type=float, default=1)
     parser.add_argument('-g', '--gamma', help="Gamma level float percentage", type=float, default=1)
-    parser.add_argument('-e', '--export-dir', help="Color level process values", default=None)
+    parser.add_argument('-e', '--export-dir', help="Export pages to JPGs in given output directory", default=None)
     parser.add_argument('-s', '--shrink', help="Inner page shrink in pixels for folded binding", type=int, default=0)
     parser.add_argument('-T', '--title', help="Set document title (place multiple words in quotes)", default="")
     parser.add_argument('-J', '--jpeg-quality', help="Adjust  JPEG  quality  level  for JPEG optimization. 100 is best quality and largest output size; 1 is lowest quality and smallest output; 0 uses the default.", type=int, default=0)
@@ -142,7 +140,6 @@ def main():
 
         page_index+=scan_start_offset
         page_end+=scan_end_offset
-        sectionImage(filename,args)
 
         scan_index += scan_sequence
     with Image() as pdf_out:
@@ -150,12 +147,14 @@ def main():
             pdf_out.sequence.append(value)
             imgs[i].destroy()
             imgs[i]=None
-        pdf_out.save(filename='series.pdf')
-    ocr('series.pdf',"ocr.pdf",
-        title=args.title,
-        jpg_quality=args.jpeg_quality,
-        deskew=args.deskew,
-        optimize=args.optimize)
+        pdf_out.save(filename=args.name)
+
+    if args.ocr:
+        ocr(args.name,args.name,
+            title=args.title,
+            jpg_quality=args.jpeg_quality,
+            deskew=args.deskew,
+            optimize=args.optimize)
 
     print("Passed")
     sys.exit(0)
