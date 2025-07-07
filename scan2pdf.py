@@ -28,14 +28,14 @@ def sectionImage(path,args,page_number,half=None, shrink=0,rotate=0):
 
     img = Image(filename=path)
     img.format = 'jpeg'
-    img.level(args.black,args.white,args.gamma)
-    img.rotate(args.rotate)
     img.crop(
         args.margin_crop[0],
         args.margin_crop[2],
         img.size[0]-args.margin_crop[1],
         img.size[1]-args.margin_crop[3]
         )
+    img.level(args.black,args.white,args.gamma)
+    img.rotate(args.rotate)
     if args.grayscale:
         img.type = "grayscale"
     if half=="left" :
