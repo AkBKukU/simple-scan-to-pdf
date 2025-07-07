@@ -9,13 +9,50 @@ From pip:
 - wand
 - ocrmypdf
 
+This heavily relies on ImageMagick and you will likely need to modify the policy file at `/etc/ImageMagick-*/policy.xml` to increase the values of the following lines:
+
+    <policy domain="resource" name="memory" value="4096MiB"/>
+    <policy domain="resource" name="disk" value="20GiB"/>
+
+
+## Common Usage Examples
+
+### ADF Single Pages
+
+This assumes you will have a folder of `tiff` files named sequentially that are already cropped to the content. This would have only one page in each scan.
+
+    scan2pdf.py --name output_file.pdf \
+        --title "The Title of the PDF File" \
+        --ocr \
+        --grayscale \
+        *.tiff
+
+### Bound Book on Flatbed Scanner
+
+This assumes you will have a folder of `tiff` files named sequentially that are already cropped to the exact size of the book's pages. There would be two pages visible per scan and the book was rotated 90 degrees to fit on the scanner. Inside the book was only text that would be better off as grayscale and OCR'ed.
+
+The cover scans would be placed in a sub-folder and name accordingly.
+
+    scan2pdf.py --name output_file.pdf \
+        --title "The Title of the PDF File" \
+        --layout-preset FLAT_TWOPAGE \
+        --prefix-cover covers/front.tiff \
+        --postfix-cover covers/back.tiff \
+        --ocr \
+        --grayscale \
+        --rotate 90 \
+        *.tiff
+
+
 ## Help
 
     $ ./scan2pdf.py -h
-    usage: scan2pdf [-h] [-p PAGE_ORDER] [-l {stapled-flat}] [-r ROTATE] [-o]
-                    [-n NAME] [-b BLACK] [-w WHITE] [-g GAMMA] [-e EXPORT_DIR]
-                    [-s SHRINK] [-T TITLE] [-J JPEG_QUALITY] [-D DESKEW]
-                    [-O OPTIMIZE]
+    usage: scan2pdf [-h] [-p PAGE_ORDER]
+                    [-l {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}]
+                    [-c PREFIX_COVER] [-z POSTFIX_COVER] [-H] [-r ROTATE] [-o]
+                    [-n NAME] [-b BLACK] [-w WHITE] [-g GAMMA] [-x]
+                    [-e EXPORT_DIR] [-s SHRINK] [-m MARGIN_CROP] [-T TITLE]
+                    [-J JPEG_QUALITY] [-D DESKEW] [-O OPTIMIZE]
                     ...
 
     Scanning post processing utility
@@ -25,33 +62,63 @@ From pip:
 
     options:
       -h, --help            show this help message and exit
-      -p, --page-order PAGE_ORDER
+      -p PAGE_ORDER, --page-order PAGE_ORDER
                             List of page order offsets to process
-      -l, --layout-preset {stapled-flat}
+      -l {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}, --layout-preset {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}
                             Use predefined page order preset
-      -r, --rotate ROTATE   Image rotation
+      -c PREFIX_COVER, --prefix-cover PREFIX_COVER
+                            Add cover image before other images without processing
+      -z POSTFIX_COVER, --postfix-cover POSTFIX_COVER
+                            Add cover image after other images without processing
+      -H, --help-detailed   More detailed help
+      -r ROTATE, --rotate ROTATE
+                            Image rotation
       -o, --ocr             OCR final output
-      -n, --name NAME       Output filename
-      -b, --black BLACK     Black level float percentage
-      -w, --white WHITE     White level float percentage
-      -g, --gamma GAMMA     Gamma level float percentage
-      -e, --export-dir EXPORT_DIR
+      -n NAME, --name NAME  Output filename
+      -b BLACK, --black BLACK
+                            Black level float percentage
+      -w WHITE, --white WHITE
+                            White level float percentage
+      -g GAMMA, --gamma GAMMA
+                            Gamma level float percentage
+      -x, --grayscale       Set output to grayscale
+      -e EXPORT_DIR, --export-dir EXPORT_DIR
                             Export pages to JPGs in given output directory
-      -s, --shrink SHRINK   Inner page shrink in pixels for folded binding
-      -T, --title TITLE     Set document title (place multiple words in quotes)
-      -J, --jpeg-quality JPEG_QUALITY
+      -s SHRINK, --shrink SHRINK
+                            Inner page shrink in pixels for folded binding
+      -m MARGIN_CROP, --margin-crop MARGIN_CROP
+                            Inset in pixels from edge to crop margins of scan, an
+                            array as [left,right,top,bottom]
+      -T TITLE, --title TITLE
+                            Set document title (place multiple words in quotes)
+      -J JPEG_QUALITY, --jpeg-quality JPEG_QUALITY
                             Adjust JPEG quality level for JPEG optimization. 100
                             is best quality and largest output size; 1 is lowest
                             quality and smallest output; 0 uses the default.
-      -D, --deskew DESKEW   Attempt deskew in OCR stage to correct rotation of
+      -D DESKEW, --deskew DESKEW
+                            Attempt deskew in OCR stage to correct rotation of
                             scans
-      -O, --optimize OPTIMIZE
+      -O OPTIMIZE, --optimize OPTIMIZE
                             Control how PDF is optimized after processing:0 - do
                             not optimize; 1 - do safe, lossless optimizations
                             (de‐fault); 2 - do some lossy optimizations; 3 - do
                             aggressive lossy optimizations (including lossy JBIG2)
 
     NOTE: Put filenames as last parameter
+
+
+## Process Order
+
+The following is the order that process operations are applied:
+
+1. Margin Crop
+2. Color Leveling (Black, White, Gamma)
+3. Rotation
+4. Grayscale
+5. Page Isolation Cropping
+6. Page Order Rotation
+
+*Note: Prefix and Postfix covers do not go through any processing by design*
 
 ## Page Layouts
 

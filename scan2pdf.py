@@ -55,6 +55,19 @@ def sectionImage(path,args,page_number,half=None, shrink=0,rotate=0):
 def help_detailed():
     print(
 """
+## Process Order
+
+The following is the order that process operations are applied:
+
+1. Margin Crop
+2. Color Leveling (Black, White, Gamma)
+3. Rotation
+4. Grayscale
+5. Page Isolation Cropping
+6. Page Order Rotation
+
+*Note: Prefix and Postfix covers do not go through any processing by design*
+
 ## Page Layouts
 
 This software allows you to define a specific order for pages in scans. It
@@ -253,7 +266,8 @@ def main():
             title=args.title,
             jpg_quality=args.jpeg_quality,
             deskew=args.deskew,
-            optimize=args.optimize)
+            optimize=args.optimize,
+            force_ocr=True)
 
     print("Passed")
     sys.exit(0)
