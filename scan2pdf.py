@@ -45,7 +45,7 @@ def main():
                     epilog='NOTE: Put filenames as last parameter')
     parser.add_argument('-p', '--page-order', help="List of page order offsets to process", type=json.loads, default=[1])
     parser.add_argument('-l', '--layout-preset', help="Use predefined page order preset", choices={"stapled-flat"}, default=None)
-    parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=None)
+    parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=0)
     parser.add_argument('-o', '--ocr', help="OCR final output", action='store_true')
     parser.add_argument('-n', '--name', help="Output filename", default="output.pdf")
     parser.add_argument('-b', '--black', help="Black level float percentage", type=float, default=0)
