@@ -153,6 +153,7 @@ def main():
     parser.add_argument('-c', '--prefix-cover', help="Add cover image before other images without processing", default=None)
     parser.add_argument('-z', '--postfix-cover', help="Add cover image after other images without processing", default=None)
     parser.add_argument('-H', '--help-detailed', help="More detailed help", action='store_true')
+    parser.add_argument('-f', '--stack-flip', help="Process pages in order of stack flipped in single sided ADF", action='store_true', default=False)
     parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=0)
     parser.add_argument('-o', '--ocr', help="OCR final output", action='store_true')
     parser.add_argument('-n', '--name', help="Output filename", default="output.pdf")
@@ -242,9 +243,13 @@ def main():
             None,
             len(imgs)-1
             )
+    # ADF stack flip mode
+    if args.stack_flip:
+        scan_start_offset=2
 
     # Iterate over scans until all pages have been processed
-    while page_index < page_end-1:
+    while (page_index < page_end-1 and scan_start_offset > 0 ) or (page_index > 0 and scan_start_offset < 0):
+
         # From page index process relates scans for page layout
         for i,valuei in enumerate(page_layout):
             for j,valuej in enumerate(page_layout[i]):
@@ -277,8 +282,12 @@ def main():
         # Next process positions
         page_index+=scan_start_offset
         page_end+=scan_end_offset
+        if page_index >= page_end-1 and args.stack_flip:
+            page_index-=1
+            scan_start_offset=-2
         scan_index += scan_sequence
 
+    sys.exit(0)
     # Store PDF of all images
     with Image() as pdf_out:
         for i,value in enumerate(imgs):

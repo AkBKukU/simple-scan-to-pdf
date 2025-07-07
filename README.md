@@ -46,65 +46,67 @@ The cover scans would be placed in a sub-folder and name accordingly.
 
 ## Help
 
-    $ ./scan2pdf.py -h
-    usage: scan2pdf [-h] [-p PAGE_ORDER]
-                    [-l {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}]
-                    [-c PREFIX_COVER] [-z POSTFIX_COVER] [-H] [-r ROTATE] [-o]
-                    [-n NAME] [-b BLACK] [-w WHITE] [-g GAMMA] [-x]
-                    [-e EXPORT_DIR] [-s SHRINK] [-m MARGIN_CROP] [-T TITLE]
-                    [-J JPEG_QUALITY] [-D DESKEW] [-O OPTIMIZE]
-                    ...
+        $ ./scan2pdf.py -h
+        usage: scan2pdf [-h] [-p PAGE_ORDER]
+                        [-l {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}]
+                        [-c PREFIX_COVER] [-z POSTFIX_COVER] [-H] [-f] [-r ROTATE]
+                        [-o] [-n NAME] [-b BLACK] [-w WHITE] [-g GAMMA] [-x]
+                        [-e EXPORT_DIR] [-s SHRINK] [-m MARGIN_CROP] [-T TITLE]
+                        [-J JPEG_QUALITY] [-D DESKEW] [-O OPTIMIZE]
+                        ...
 
-    Scanning post processing utility
+        Scanning post processing utility
 
-    positional arguments:
-      filenames
+        positional arguments:
+        filenames
 
-    options:
-      -h, --help            show this help message and exit
-      -p PAGE_ORDER, --page-order PAGE_ORDER
-                            List of page order offsets to process
-      -l {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}, --layout-preset {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}
-                            Use predefined page order preset
-      -c PREFIX_COVER, --prefix-cover PREFIX_COVER
-                            Add cover image before other images without processing
-      -z POSTFIX_COVER, --postfix-cover POSTFIX_COVER
-                            Add cover image after other images without processing
-      -H, --help-detailed   More detailed help
-      -r ROTATE, --rotate ROTATE
-                            Image rotation
-      -o, --ocr             OCR final output
-      -n NAME, --name NAME  Output filename
-      -b BLACK, --black BLACK
-                            Black level float percentage
-      -w WHITE, --white WHITE
-                            White level float percentage
-      -g GAMMA, --gamma GAMMA
-                            Gamma level float percentage
-      -x, --grayscale       Set output to grayscale
-      -e EXPORT_DIR, --export-dir EXPORT_DIR
-                            Export pages to JPGs in given output directory
-      -s SHRINK, --shrink SHRINK
-                            Inner page shrink in pixels for folded binding
-      -m MARGIN_CROP, --margin-crop MARGIN_CROP
-                            Inset in pixels from edge to crop margins of scan, an
-                            array as [left,right,top,bottom]
-      -T TITLE, --title TITLE
-                            Set document title (place multiple words in quotes)
-      -J JPEG_QUALITY, --jpeg-quality JPEG_QUALITY
-                            Adjust JPEG quality level for JPEG optimization. 100
-                            is best quality and largest output size; 1 is lowest
-                            quality and smallest output; 0 uses the default.
-      -D DESKEW, --deskew DESKEW
-                            Attempt deskew in OCR stage to correct rotation of
-                            scans
-      -O OPTIMIZE, --optimize OPTIMIZE
-                            Control how PDF is optimized after processing:0 - do
-                            not optimize; 1 - do safe, lossless optimizations
-                            (de‐fault); 2 - do some lossy optimizations; 3 - do
-                            aggressive lossy optimizations (including lossy JBIG2)
+        options:
+        -h, --help            show this help message and exit
+        -p PAGE_ORDER, --page-order PAGE_ORDER
+                                List of page order offsets to process
+        -l {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}, --layout-preset {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}
+                                Use predefined page order preset
+        -c PREFIX_COVER, --prefix-cover PREFIX_COVER
+                                Add cover image before other images without processing
+        -z POSTFIX_COVER, --postfix-cover POSTFIX_COVER
+                                Add cover image after other images without processing
+        -H, --help-detailed   More detailed help
+        -f, --stack-flip      Process pages in order of stack flipped in single sided ADF
+        -r ROTATE, --rotate ROTATE
+                                Image rotation
+        -o, --ocr             OCR final output
+        -n NAME, --name NAME  Output filename
+        -b BLACK, --black BLACK
+                                Black level float percentage
+        -w WHITE, --white WHITE
+                                White level float percentage
+        -g GAMMA, --gamma GAMMA
+                                Gamma level float percentage
+        -x, --grayscale       Set output to grayscale
+        -e EXPORT_DIR, --export-dir EXPORT_DIR
+                                Export pages to JPGs in given output directory
+        -s SHRINK, --shrink SHRINK
+                                Inner page shrink in pixels for folded binding
+        -m MARGIN_CROP, --margin-crop MARGIN_CROP
+                                Inset in pixels from edge to crop margins of scan, an
+                                array as [left,right,top,bottom]
+        -T TITLE, --title TITLE
+                                Set document title (place multiple words in quotes)
+        -J JPEG_QUALITY, --jpeg-quality JPEG_QUALITY
+                                Adjust JPEG quality level for JPEG optimization. 100
+                                is best quality and largest output size; 1 is lowest
+                                quality and smallest output; 0 uses the default.
+        -D DESKEW, --deskew DESKEW
+                                Attempt deskew in OCR stage to correct rotation of
+                                scans
+        -O OPTIMIZE, --optimize OPTIMIZE
+                                Control how PDF is optimized after processing:0 - do
+                                not optimize; 1 - do safe, lossless optimizations
+                                (de‐fault); 2 - do some lossy optimizations; 3 - do
+                                aggressive lossy optimizations (including lossy JBIG2)
 
-    NOTE: Put filenames as last parameter
+        NOTE: Put filenames as last parameter
+
 
 
 ## Process Order
