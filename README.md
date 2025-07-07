@@ -50,7 +50,7 @@ The cover scans would be placed in a sub-folder and name accordingly.
         usage: scan2pdf [-h] [-p PAGE_ORDER]
                         [-l {UNBOUND_SADDLE_STITCH,UNBOUND_DOUBLE_SIDED_SEQUENTIAL,FLAT_TWOPAGE,FLAT_SINGLEPAGE,EDGE_ROTATE}]
                         [-c PREFIX_COVER] [-z POSTFIX_COVER] [-H] [-f] [-r ROTATE]
-                        [-o] [-n NAME] [-b BLACK] [-w WHITE] [-g GAMMA] [-x]
+                        [-t TRIM] [-o] [-n NAME] [-b BLACK] [-w WHITE] [-g GAMMA] [-x]
                         [-e EXPORT_DIR] [-s SHRINK] [-m MARGIN_CROP] [-T TITLE]
                         [-J JPEG_QUALITY] [-D DESKEW] [-O OPTIMIZE]
                         ...
@@ -71,9 +71,12 @@ The cover scans would be placed in a sub-folder and name accordingly.
         -z POSTFIX_COVER, --postfix-cover POSTFIX_COVER
                                 Add cover image after other images without processing
         -H, --help-detailed   More detailed help
-        -f, --stack-flip      Process pages in order of stack flipped in single sided ADF
+        -f, --stack-flip      Process pages in order of stack flipped in single
+                                sided ADF
         -r ROTATE, --rotate ROTATE
                                 Image rotation
+        -t TRIM, --trim TRIM  Automatically trim image with fuzz float percentage
+                                based on top left pixel
         -o, --ocr             OCR final output
         -n NAME, --name NAME  Output filename
         -b BLACK, --black BLACK
@@ -108,17 +111,17 @@ The cover scans would be placed in a sub-folder and name accordingly.
         NOTE: Put filenames as last parameter
 
 
-
 ## Process Order
 
 The following is the order that process operations are applied:
 
 1. Margin Crop
-2. Color Leveling (Black, White, Gamma)
-3. Rotation
-4. Grayscale
-5. Page Isolation Cropping
-6. Page Order Rotation
+2. Trim
+3. Color Leveling (Black, White, Gamma)
+4. Rotation
+5. Grayscale
+6. Page Isolation Cropping
+7. Page Order Rotation
 
 *Note: Prefix and Postfix covers do not go through any processing by design*
 

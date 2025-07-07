@@ -39,6 +39,9 @@ def sectionImage(path,args,page_number,half=None, shrink=0,rotate=0):
             img.size[0]-args.margin_crop[1],
             img.size[1]-args.margin_crop[3]
             )
+        # Apply trim crop
+        if args.trim != 0:
+            img.trim(fuzz=img.quantum_range * args.trim)
         # Apply color level
         img.level(args.black,args.white,args.gamma)
         # Rotate full scan
@@ -155,6 +158,7 @@ def main():
     parser.add_argument('-H', '--help-detailed', help="More detailed help", action='store_true')
     parser.add_argument('-f', '--stack-flip', help="Process pages in order of stack flipped in single sided ADF", action='store_true', default=False)
     parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=0)
+    parser.add_argument('-t', '--trim', help="Automatically trim image with fuzz float percentage based on top left pixel", type=float, default=0)
     parser.add_argument('-o', '--ocr', help="OCR final output", action='store_true')
     parser.add_argument('-n', '--name', help="Output filename", default="output.pdf")
     parser.add_argument('-b', '--black', help="Black level float percentage", type=float, default=0)
