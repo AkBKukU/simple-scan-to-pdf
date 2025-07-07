@@ -291,7 +291,6 @@ def main():
             scan_start_offset=-2
         scan_index += scan_sequence
 
-    sys.exit(0)
     # Store PDF of all images
     with Image() as pdf_out:
         for i,value in enumerate(imgs):
