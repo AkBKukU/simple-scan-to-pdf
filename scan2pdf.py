@@ -36,6 +36,8 @@ def sectionImage(path,args,page_number,half=None, shrink=0,rotate=0):
         img.size[0]-args.margin_crop[1],
         img.size[1]-args.margin_crop[3]
         )
+    if args.grayscale:
+        img.type = "grayscale"
     if half=="left" :
         img.crop(shrink, 0, round(img.size[0]/2-shrink/2), img.size[1])
     if half=="right":
@@ -133,6 +135,7 @@ def main():
     parser.add_argument('-b', '--black', help="Black level float percentage", type=float, default=0)
     parser.add_argument('-w', '--white', help="White level float percentage", type=float, default=1)
     parser.add_argument('-g', '--gamma', help="Gamma level float percentage", type=float, default=1)
+    parser.add_argument('-x', '--grayscale', help="Set output to grayscale", action='store_true')
     parser.add_argument('-e', '--export-dir', help="Export pages to JPGs in given output directory", default=None)
     parser.add_argument('-s', '--shrink', help="Inner page shrink in pixels for folded binding", type=int, default=0)
     parser.add_argument('-m', '--margin-crop', help="Inset in pixels from edge to crop margins of scan, an array as [left,right,top,bottom]", type=json.loads, default=[0,0,0,0])
