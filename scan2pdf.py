@@ -30,6 +30,12 @@ def sectionImage(path,args,page_number,half=None, shrink=0,rotate=0):
     img.format = 'jpeg'
     img.level(args.black,args.white,args.gamma)
     img.rotate(args.rotate)
+    img.crop(
+        args.margin_crop[0],
+        args.margin_crop[2],
+        img.size[0]-args.margin_crop[1],
+        img.size[1]-args.margin_crop[3]
+        )
     if half=="left" :
         img.crop(shrink, 0, round(img.size[0]/2-shrink/2), img.size[1])
     if half=="right":
@@ -129,6 +135,7 @@ def main():
     parser.add_argument('-g', '--gamma', help="Gamma level float percentage", type=float, default=1)
     parser.add_argument('-e', '--export-dir', help="Export pages to JPGs in given output directory", default=None)
     parser.add_argument('-s', '--shrink', help="Inner page shrink in pixels for folded binding", type=int, default=0)
+    parser.add_argument('-m', '--margin-crop', help="Inset in pixels from edge to crop margins of scan, an array as [left,right,top,bottom]", type=json.loads, default=[0,0,0,0])
     parser.add_argument('-T', '--title', help="Set document title (place multiple words in quotes)", default="")
     parser.add_argument('-J', '--jpeg-quality', help="Adjust  JPEG  quality  level  for JPEG optimization. 100 is best quality and largest output size; 1 is lowest quality and smallest output; 0 uses the default.", type=int, default=0)
     parser.add_argument('-D', '--deskew', help="Attempt deskew in OCR stage to correct rotation of scans", type=bool, default=False)
