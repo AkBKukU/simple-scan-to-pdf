@@ -176,7 +176,7 @@ def main():
         sys.exit(0)
 
     # Find layout preset if provided
-    if args.layout_preset.upper() in PageLayouts.__members__:
+    if args.layout_preset is not None and args.layout_preset.upper() in PageLayouts.__members__:
         page_layout = PageLayouts[args.layout_preset.upper()].value
     else:
         page_layout = args.page_order
