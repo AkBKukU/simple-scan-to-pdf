@@ -223,6 +223,11 @@ def main():
     scan_count=len(args.filenames)
     page_end=len(args.filenames)*scans_per_page+1+prefix_offset
 
+    if scan_count == 0:
+        print("Please provide files to process as the final arguments on the command line")
+        sys.exit(0)
+
+
     print(f"scan_sequence : {scan_sequence}")
     print(f"scans_per_page : {scans_per_page}")
     print(f"scan_start_offset : {scan_start_offset}")
