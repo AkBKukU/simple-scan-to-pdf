@@ -28,27 +28,28 @@ def sectionImage(path,args,page_number,half=None, shrink=0,rotate=0):
 
     img = Image(filename=path)
     img.format = 'jpeg'
-    img.crop(
-        args.margin_crop[0],
-        args.margin_crop[2],
-        img.size[0]-args.margin_crop[1],
-        img.size[1]-args.margin_crop[3]
-        )
-    img.level(args.black,args.white,args.gamma)
-    img.rotate(args.rotate)
-    if args.grayscale:
-        img.type = "grayscale"
-    if half=="left" :
-        img.crop(shrink, 0, round(img.size[0]/2-shrink/2), img.size[1])
-    if half=="right":
-        img.crop(round(img.size[0]/2+shrink/2), 0, img.size[0], img.size[1])
+    if args is not None:
+        img.crop(
+            args.margin_crop[0],
+            args.margin_crop[2],
+            img.size[0]-args.margin_crop[1],
+            img.size[1]-args.margin_crop[3]
+            )
+        img.level(args.black,args.white,args.gamma)
+        img.rotate(args.rotate)
+        if args.grayscale:
+            img.type = "grayscale"
+        if half=="left" :
+            img.crop(shrink, 0, round(img.size[0]/2-shrink/2), img.size[1])
+        if half=="right":
+            img.crop(round(img.size[0]/2+shrink/2), 0, img.size[0], img.size[1])
 
-    img.rotate(rotate)
-    if args.export_dir is not None:
-        outdir=str(args.export_dir)+"/"
-        if not os.path.exists(outdir):
-            os.makedirs(outdir)
-        img.save(filename=outdir+str(page_number).zfill(4)+"_"+path.replace(".tiff", ".jpg"))
+        img.rotate(rotate)
+        if args.export_dir is not None:
+            outdir=str(args.export_dir)+"/"
+            if not os.path.exists(outdir):
+                os.makedirs(outdir)
+            img.save(filename=outdir+str(page_number).zfill(4)+"_"+path.replace(".tiff", ".jpg"))
     return img
 
 def help_detailed():
@@ -128,6 +129,8 @@ def main():
                     epilog='NOTE: Put filenames as last parameter')
     parser.add_argument('-p', '--page-order', help="List of page order offsets to process", type=json.loads, default=[1])
     parser.add_argument('-l', '--layout-preset', help="Use predefined page order preset", choices=page_layout_options, default=None)
+    parser.add_argument('-c', '--prefix-cover', help="Add cover image before other images without processing", default=None)
+    parser.add_argument('-z', '--postfix-cover', help="Add cover image after other images without processing", default=None)
     parser.add_argument('-H', '--help-detailed', help="More detailed help", action='store_true')
     parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=0)
     parser.add_argument('-o', '--ocr', help="OCR final output", action='store_true')
@@ -171,11 +174,18 @@ def main():
             if int(page_layout[i][j]) < scan_end_offset:
                 scan_end_offset = int(page_layout[i][j])
 
+    prefix_offset=0
+    if args.prefix_cover is not None:
+        prefix_offset=1
+
+    postfix_offset=0
+    if args.postfix_cover is not None:
+        postfix_offset=1
 
     scan_index=0
-    page_index=0
+    page_index=0+prefix_offset
     scan_count=len(args.filenames)
-    page_end=len(args.filenames)*scans_per_page+1
+    page_end=len(args.filenames)*scans_per_page+1+prefix_offset
 
     print(f"scan_sequence : {scan_sequence}")
     print(f"scans_per_page : {scans_per_page}")
@@ -183,7 +193,21 @@ def main():
     print(f"scan_end_offset : {scan_end_offset}")
     print(f"page_end : {page_end}")
 
-    imgs=[None]*(page_end-1)
+    imgs=[None]*(page_end-1+postfix_offset)
+
+    if args.prefix_cover is not None:
+        imgs[0]=sectionImage(
+            args.prefix_cover,
+            None,
+            0
+            )
+
+    if args.postfix_cover is not None:
+        imgs[len(imgs)-1]=sectionImage(
+            args.postfix_cover,
+            None,
+            len(imgs)-1
+            )
 
     while page_index < page_end-1:
 
