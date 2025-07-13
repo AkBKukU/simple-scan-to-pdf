@@ -161,6 +161,7 @@ def main():
     parser.add_argument('-t', '--trim', help="Automatically trim image with fuzz float percentage based on top left pixel", type=float, default=0)
     parser.add_argument('-o', '--ocr', help="OCR final output", action='store_true')
     parser.add_argument('-n', '--name', help="Output filename", default="output.pdf")
+    parser.add_argument('-d', '--disable-pdf', help="Do not output a PDF, intended to be used with `-e` to only output images", default="output.pdf")
     parser.add_argument('-b', '--black', help="Black level float percentage", type=float, default=0)
     parser.add_argument('-w', '--white', help="White level float percentage", type=float, default=1)
     parser.add_argument('-g', '--gamma', help="Gamma level float percentage", type=float, default=1)
