@@ -153,8 +153,8 @@ def main():
                     epilog='NOTE: Put filenames as last parameter')
     parser.add_argument('-p', '--page-order', help="List of page order offsets to process", type=json.loads, default=[1])
     parser.add_argument('-l', '--layout-preset', help="Use predefined page order preset", choices=page_layout_options, default=None)
-    parser.add_argument('-c', '--prefix-cover', help="Add cover image before other images without processing", default=None)
-    parser.add_argument('-z', '--postfix-cover', help="Add cover image after other images without processing", default=None)
+    parser.add_argument('-c', '--prefix-cover', help="Add cover image before other images without processing. Can be added multiple times for additional cover images.", action="append", default=None)
+    parser.add_argument('-z', '--postfix-cover', help="Add cover image after other images without processing. Can be added multiple times for additional cover images.", action="append", default=None)
     parser.add_argument('-H', '--help-detailed', help="More detailed help", action='store_true')
     parser.add_argument('-f', '--stack-flip', help="Process pages in order of stack flipped in single sided ADF", action='store_true', default=False)
     parser.add_argument('-r', '--rotate', help="Image rotation", type=int, default=0)
@@ -211,12 +211,12 @@ def main():
     # Adjust page_index if front cover is provided
     prefix_offset=0
     if args.prefix_cover is not None:
-        prefix_offset=1
+        prefix_offset=len(args.prefix_cover)
 
     # Adjust page_end if front cover is provided
     postfix_offset=0
     if args.postfix_cover is not None:
-        postfix_offset=1
+        postfix_offset=len(args.postfix_cover)
 
     # Initialize position tracking for processing
     scan_index=0
@@ -240,19 +240,28 @@ def main():
 
     # Add front cover
     if args.prefix_cover is not None:
-        imgs[0]=sectionImage(
-            args.prefix_cover,
-            None,
-            0
-            )
+        i=0
+        for cover in args.prefix_cover:
+            imgs[i]=sectionImage(
+                cover,
+                None,
+                0
+                )
+            i+=1
+
+
 
     # Add rear cover
     if args.postfix_cover is not None:
-        imgs[len(imgs)-1]=sectionImage(
-            args.postfix_cover,
-            None,
-            len(imgs)-1
-            )
+        i=1
+        for cover in args.postfix_cover:
+            imgs[len(imgs)-i]=sectionImage(
+                cover,
+                None,
+                0
+                )
+            i+=1
+
     # ADF stack flip mode
     if args.stack_flip:
         scan_start_offset=2
