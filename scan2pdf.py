@@ -7,6 +7,7 @@ import os
 import json
 from pprint import pprint
 from enum import Enum
+import glob
 
 # External System
 from wand.image import Image
@@ -171,7 +172,7 @@ def main():
     parser.add_argument('-m', '--margin-crop', help="Inset in pixels from edge to crop margins of scan, an array as [left,right,top,bottom]", type=json.loads, default=[0,0,0,0])
     parser.add_argument('-T', '--title', help="Set document title (place multiple words in quotes)", default="")
     parser.add_argument('-J', '--jpeg-quality', help="Adjust  JPEG  quality  level  for JPEG optimization. 100 is best quality and largest output size; 1 is lowest quality and smallest output; 0 uses the default.", type=int, default=0)
-    parser.add_argument('-D', '--deskew', help="Attempt deskew in OCR stage to correct rotation of scans", type=bool, default=False)
+    parser.add_argument('-D', '--deskew', help="Attempt deskew in OCR stage to correct rotation of scans", default=False, action='store_true')
     parser.add_argument('-O', '--optimize', help="Control how PDF is optimized after processing:0 - do not optimize; 1 - do safe, lossless  optimizations  (de‐fault); 2 - do some lossy optimizations; 3 - do aggressive lossy optimizations (including lossy JBIG2)", type=int, default=0)
     parser.add_argument('filenames', help="", default=None, nargs=argparse.REMAINDER)
     args = parser.parse_args()
@@ -180,6 +181,17 @@ def main():
     if args.help_detailed:
         help_detailed()
         sys.exit(0)
+
+    ### Handle Windows issues
+    processed_filenames = []
+    
+    for filename in args.filenames:
+        # Normalize path separators
+        normalized_path = os.path.normpath(filename)
+        matched_files = glob.glob(normalized_path)
+        processed_filenames.extend(matched_files)
+    args.filenames = processed_filenames
+    ### End Windows fix
 
     # Find layout preset if provided
     if args.layout_preset is not None and args.layout_preset.upper() in PageLayouts.__members__:
